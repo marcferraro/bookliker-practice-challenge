@@ -100,14 +100,20 @@ function renderBookProfile(book){
         li.dataset.id = user.id
         ul.append(li)
     })
-// debugger
+    
+    div.append(img, h3, h3Sub, h3Author, p, ul)
+
     const likeButton = document.createElement('button')
-    likeButton.innerText = 'LIKE'
+
+    if (document.getElementById('pouros')){
+        likeButton.innerText = 'UNLIKE'
+    } else {
+        likeButton.innerText = 'LIKE'
+    }
     likeButton.id = 'like-btn'
+    likeButton.dataset.id = book.id
+    div.append(likeButton)
 
-
-    div.append(img, h3, h3Sub, h3Author, p, ul, likeButton)
-    // debugger
 }
 
 function toggleLikeStatus(eventTarget){
@@ -116,15 +122,16 @@ function toggleLikeStatus(eventTarget){
     if (pouros){
         pouros.remove()
         const list = document.getElementById('like-by-list').childNodes
-        const likeList = []
+        const likeList = {}
+        const likeArray = []
         // debugger
         list.forEach(li => {
             const obj = {}
             obj.id = li.dataset.id
             obj.username = li.id
-            likeList.push(obj)
+            likeArray.push(obj)
         })
-         debugger
+        likeList.users = likeArray
 
         const reqObj = {
             method: "PATCH",
@@ -134,7 +141,38 @@ function toggleLikeStatus(eventTarget){
             body: JSON.stringify(likeList)
         }
 
-        fetch(booksUrl, reqObj)
-        
+        fetch(booksUrl + `/${eventTarget.dataset.id}`, reqObj)
+        .then(resp => resp.json())
+        .then(likers => console.log('unliked.'))
+    } else {
+        const ul = document.getElementById('like-by-list')
+        const li = document.createElement('li')
+        li.innerText = 'pouros'
+        li.id = 'pouros'
+        li.dataset.id = 1
+        ul.append(li)
+        const list = document.getElementById('like-by-list').childNodes
+        const likeList = {}
+        const likeArray = []
+
+        list.forEach(li => {
+            const obj = {}
+            obj.id = li.dataset.id
+            obj.username = li.id
+            likeArray.push(obj)
+        })
+        likeList.users = likeArray
+        // debugger
+        const reqObj = {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(likeList)
+        }
+
+        fetch(booksUrl + `/${eventTarget.dataset.id}`, reqObj)
+        .then(resp => resp.json())
+        .then(likers => console.log('liked.'))
     }
 }
